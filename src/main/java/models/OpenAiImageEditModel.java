@@ -7,7 +7,7 @@ public class OpenAiImageEditModel implements ImageEditModel{
     private RestClient client;
 
     @Override
-    public ImageEditResponse call(ImageEditRequest request) {
-        return null;
+    public ImageEditResponse call(ImageEditPrompt request) {
+        ;
     }
 }
