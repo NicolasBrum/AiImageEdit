@@ -4,37 +4,50 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>brum.nicolas</groupId>
-    <artifactId>ImageEditAi</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <groupId>io.github.NicolasBrum</groupId>
+    <artifactId>ai-image-edit</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+
+    <name>AI Image Edit</name>
+    <description>Lib for integration image-to-image with many clients of AI.</description>
+    <url>https://github.com/NicolasBrum/ImageEditAi</url>
 
     <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring.version>6.1.21</spring.version>
+        <spring-boot.version>4.0.0</spring-boot.version>
+        <spring-ai.version>2.0.0</spring-ai.version>
     </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-openai</artifactId>
+            <optional>true</optional>
         </dependency>
+
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
-            <version>${spring.version}</version>
         </dependency>
     </dependencies>
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
                 <groupId>org.springframework.ai</groupId>
                 <artifactId>spring-ai-bom</artifactId>
-                <version>2.0.0</version>
+                <version>${spring-ai.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
-
 </project>

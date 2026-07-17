@@ -1,4 +1,4 @@
-package models;
+package io.github.nicolasbrum.models.dtos;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
