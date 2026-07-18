@@ -1,4 +1,4 @@
-package io.github.nicolasbrum.models.dtos;
+package io.github.nicolasbrum.provider.openai.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

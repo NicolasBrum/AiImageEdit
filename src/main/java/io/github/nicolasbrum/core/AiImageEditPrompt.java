@@ -1,5 +1,7 @@
-package io.github.nicolasbrum.models;
+package io.github.nicolasbrum.core;
 
+import io.github.nicolasbrum.exceptions.AiImageEditPromptException;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.ai.image.ImageOptions;
 import org.springframework.ai.model.ModelOptions;
@@ -9,6 +11,7 @@ import org.springframework.http.MediaType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class AiImageEditPrompt implements ModelRequest<List<String>> {
     private List<String> instructions;
@@ -18,8 +21,8 @@ public class AiImageEditPrompt implements ModelRequest<List<String>> {
 
     private AiImageEditPrompt() {}
 
-    public AiImageEditPrompt(Builder builder) {
-        this.instructions = builder.instructions;
+    private AiImageEditPrompt(Builder builder) {
+        this.instructions = List.copyOf(builder.instructions);
         this.imageOptions = builder.imageOptions;
         this.resource = builder.resource;
         this.mediaType = builder.mediaType;
@@ -30,12 +33,12 @@ public class AiImageEditPrompt implements ModelRequest<List<String>> {
     }
 
     @Override
-    public List<String> getInstructions() {
+    public @NonNull List<String> getInstructions() {
         return List.copyOf(instructions);
     }
 
     @Override
-    public @Nullable ModelOptions getOptions() {
+    public @NonNull ModelOptions getOptions() {
         return this.imageOptions;
     }
 
@@ -60,12 +63,8 @@ public class AiImageEditPrompt implements ModelRequest<List<String>> {
             return this;
         }
 
-        public Builder addInstruction(String instruction){
-            this.instructions.add(instruction);
-            return this;
-        }
-
         public Builder instruction(String instruction){
+            Objects.requireNonNull(instruction);
             this.instructions.add(instruction);
             return this;
         }
@@ -90,13 +89,13 @@ public class AiImageEditPrompt implements ModelRequest<List<String>> {
                 this.imageOptions = new DefaultImageEditOptions();
             }
             if(this.resource == null){
-                throw new IllegalArgumentException("resource must not be null.");
+                throw new AiImageEditPromptException("resource must not be null or empty.");
             }
-            if(this.instructions == null){
-                throw new IllegalArgumentException("instructions must not be null.");
+            if(this.instructions == null || this.instructions.isEmpty()){
+                throw new AiImageEditPromptException("instructions must not be null.");
             }
             if(this.mediaType == null){
-                throw new IllegalArgumentException("mediaType must not be null.");
+                throw new AiImageEditPromptException("mediaType must not be null.");
             }
 
             return new AiImageEditPrompt(this);
@@ -112,27 +111,27 @@ public class AiImageEditPrompt implements ModelRequest<List<String>> {
 
         @Override
         public @Nullable String getModel() {
-            return "gpt-image-1";
+            return null;
         }
 
         @Override
         public @Nullable Integer getWidth() {
-            return 1080;
+            return null;
         }
 
         @Override
         public @Nullable Integer getHeight() {
-            return 800;
+            return null;
         }
 
         @Override
         public @Nullable String getResponseFormat() {
-            return "jpeg";
+            return null;
         }
 
         @Override
         public @Nullable String getStyle() {
-            return "normal";
+            return null;
         }
     }
 

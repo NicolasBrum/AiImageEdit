@@ -1,9 +1,12 @@
-package io.github.nicolasbrum.models;
+package io.github.nicolasbrum.provider.openai;
 
-import io.github.nicolasbrum.models.dtos.OpenAiImageEditResponseModel;
+import io.github.nicolasbrum.config.AiProvidersApiUrl;
+import io.github.nicolasbrum.core.AiImageEditClient;
+import io.github.nicolasbrum.core.AiImageEditPrompt;
+import io.github.nicolasbrum.core.AiImageEditResult;
+import io.github.nicolasbrum.provider.openai.dto.OpenAiImageEditResult;
 import org.springframework.ai.image.ImageOptions;
-import org.springframework.ai.openai.OpenAiImageOptions;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -16,29 +19,24 @@ import org.springframework.web.client.RestClient;
 
 import java.time.Duration;
 
-@Component
-public class OpenAiAiImageEditClient implements AiImageEditClient {
+public class OpenAiImageEditClient implements AiImageEditClient {
 
-    private final static String BASE_URL = "https://api.openai.com/v1";
     private final RestClient restClient;
 
-    @Value("${spring.ai.openai.api-key}")
-    private String apiKey;
-
-    public OpenAiAiImageEditClient(){
+    public OpenAiImageEditClient(String apikey, Duration connectionTimeout, Duration readTimeout) {
         var requestFactory = new ReactorClientHttpRequestFactory();
-        requestFactory.setConnectTimeout(Duration.ofSeconds(30));
-        requestFactory.setReadTimeout(Duration.ofMinutes(3));
+        requestFactory.setConnectTimeout(connectionTimeout);
+        requestFactory.setReadTimeout(readTimeout);
 
         this.restClient = RestClient.builder()
-                .baseUrl(BASE_URL)
-                .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey)
+                .baseUrl(AiProvidersApiUrl.OPENAI)
+                .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + apikey)
                 .requestFactory(requestFactory)
                 .build();
     }
 
     @Override
-    public OpenAiImageEditResponseModel send(AiImageEditPrompt aiImageEditPrompt) {
+    public AiImageEditResult send(AiImageEditPrompt aiImageEditPrompt) {
 
         var instructions = aiImageEditPrompt.getInstructions();
         var resource = aiImageEditPrompt.getResource();
@@ -51,17 +49,23 @@ public class OpenAiAiImageEditClient implements AiImageEditClient {
         HttpEntity<Resource> imagePart = new HttpEntity<>(resource, imageHeaders);
         MultiValueMap<String, Object> multipartBody = new LinkedMultiValueMap<>();
         multipartBody.add("prompt", String.join("\n", instructions));
-        multipartBody.add("model", options.getModel());
-        multipartBody.add("n", options.getN().toString());
         multipartBody.add("image", imagePart);
 
-        var response = restClient.post()
+        if (options.getModel() != null) {
+            multipartBody.add("model", options.getModel());
+        }
+        if (options.getN() != null) {
+            multipartBody.add("n", options.getN().toString());
+        }
+
+        OpenAiImageEditResult openAiResult = restClient.post()
                 .uri("/images/edits")
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(multipartBody)
                 .retrieve()
-                .toEntity(OpenAiImageEditResponseModel.class);
+                .toEntity(OpenAiImageEditResult.class)
+                .getBody();
 
-        return response.getBody();
+        return new OpenAiImageResultAdapter(openAiResult);
     }
 }
