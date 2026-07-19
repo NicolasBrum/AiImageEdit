@@ -16,22 +16,31 @@ public class OpenAiImageResultAdapter implements AiImageEditResult {
     private final ImageResponseMetadata imageResponseMetadata;
 
     public OpenAiImageResultAdapter(OpenAiImageEditResult result) {
-        Objects.requireNonNull(result);
+        Objects.requireNonNull(result, "result must not be null");
+        var data = Objects.requireNonNull(result.data(), "result.data must not be null");
 
-        this.images = result.data()
+        this.images = data
                 .stream()
-                .map(imageData -> new Image(null,imageData.base64image()))
+                .map(imageData -> {
+                    Objects.requireNonNull(imageData, "image data must not be null");
+                    var base64Image = Objects.requireNonNull(
+                            imageData.base64image(),
+                            "image data base64 must not be null"
+                    );
+                    return new Image(null, base64Image);
+                })
                 .toList();
 
-        Objects.requireNonNull(result.created());
-        Objects.requireNonNull(result.size());
-        Objects.requireNonNull(result.outputFormat());
-        Objects.requireNonNull(result.data());
-
         this.imageResponseMetadata = new ImageResponseMetadata(result.created());
-        this.imageResponseMetadata.put(AiImageEditMetadataKeys.QUALITY,result.quality());
-        this.imageResponseMetadata.put(AiImageEditMetadataKeys.OUTPUT_FORMAT,result.outputFormat());
-        this.imageResponseMetadata.put(AiImageEditMetadataKeys.SIZE,result.size());
+        putMetadataIfPresent(AiImageEditMetadataKeys.QUALITY, result.quality());
+        putMetadataIfPresent(AiImageEditMetadataKeys.OUTPUT_FORMAT, result.outputFormat());
+        putMetadataIfPresent(AiImageEditMetadataKeys.SIZE, result.size());
+    }
+
+    private void putMetadataIfPresent(String key, Object value) {
+        if (value != null) {
+            this.imageResponseMetadata.put(key, value);
+        }
     }
 
     @Override

@@ -6,17 +6,16 @@ import io.github.nicolasbrum.core.AiImageEditPrompt;
 import io.github.nicolasbrum.core.AiImageEditResult;
 import io.github.nicolasbrum.provider.openai.dto.OpenAiImageEditResult;
 import org.springframework.ai.image.ImageOptions;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.http.client.ReactorClientHttpRequestFactory;
-import org.springframework.stereotype.Component;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 
+import java.net.http.HttpClient;
 import java.time.Duration;
 
 public class OpenAiImageEditClient implements AiImageEditClient {
@@ -24,8 +23,10 @@ public class OpenAiImageEditClient implements AiImageEditClient {
     private final RestClient restClient;
 
     public OpenAiImageEditClient(String apikey, Duration connectionTimeout, Duration readTimeout) {
-        var requestFactory = new ReactorClientHttpRequestFactory();
-        requestFactory.setConnectTimeout(connectionTimeout);
+        var httpClient = HttpClient.newBuilder()
+                .connectTimeout(connectionTimeout)
+                .build();
+        var requestFactory = new JdkClientHttpRequestFactory(httpClient);
         requestFactory.setReadTimeout(readTimeout);
 
         this.restClient = RestClient.builder()
@@ -51,12 +52,8 @@ public class OpenAiImageEditClient implements AiImageEditClient {
         multipartBody.add("prompt", String.join("\n", instructions));
         multipartBody.add("image", imagePart);
 
-        if (options.getModel() != null) {
-            multipartBody.add("model", options.getModel());
-        }
-        if (options.getN() != null) {
-            multipartBody.add("n", options.getN().toString());
-        }
+        multipartBody.add("model", options.getModel() == null ? "gpt-image-1" : options.getModel());
+        multipartBody.add("n", options.getN() == null ? 1 : options.getN());
 
         OpenAiImageEditResult openAiResult = restClient.post()
                 .uri("/images/edits")

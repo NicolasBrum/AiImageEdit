@@ -15,12 +15,16 @@ public class OpenAiImageEditConfiguration {
     public OpenAiImageEditClient openAiImageEditClient(
             @Value("${spring.ai.openai.api-key:${ai.image.edit.client.openai.api-key}}")
             String apiKey,
-            @Value("${ai.image.edit.client.openai.con.timeout:${ai.image.edit.client.openai.con.timeout=30s}}")
-            Duration connectionTimeout,
-            @Value("${ai.image.edit.client.openai.read.timeout:${ai.image.edit.client.openai.read.timeout=3m}}")
-            Duration readTimeout
+            @Value("${ai.image.edit.client.openai.connection-timeout:PT30S}")
+            String connectionTimeout,
+            @Value("${ai.image.edit.client.openai.read-timeout:PT3M}")
+            String readTimeout
     ) {
-        return new OpenAiImageEditClient(apiKey, connectionTimeout, readTimeout);
+        return new OpenAiImageEditClient(
+                apiKey,
+                Duration.parse(connectionTimeout),
+                Duration.parse(readTimeout)
+        );
     }
 
     @Bean
