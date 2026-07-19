@@ -1,4 +1,5 @@
 # AI Image Edit
+## 0.1.0 - SNAPSHOT
 
 Biblioteca Java para integrar operações de **image-to-image** a modelos de inteligência artificial integrando ao módulo existente do Spring AI.
 
