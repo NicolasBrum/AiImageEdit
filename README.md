@@ -1,5 +1,5 @@
 # AI Image Edit
-
+## 0.1.0-SNAPSHOT
 Biblioteca Java para integrar operações de **image-to-image** a modelos de inteligência artificial integrando ao módulo existente do Spring AI.
 
 A proposta do projeto é receber uma imagem e instruções textuais, delegar a edição a um provedor de IA e devolver o resultado usando as abstrações de imagem do Spring AI. A implementação atual integra a API de edição de imagens da OpenAI; a separação entre `core` e `provider` prepara a biblioteca para receber outros provedores no futuro.
