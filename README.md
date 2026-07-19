@@ -1,6 +1,6 @@
 # AI Image Edit
 
-Biblioteca Java para integrar operações de **image-to-image** a modelos de inteligência artificial por meio de uma API comum.
+Biblioteca Java para integrar operações de **image-to-image** a modelos de inteligência artificial integrando ao módulo existente do Spring AI.
 
 A proposta do projeto é receber uma imagem e instruções textuais, delegar a edição a um provedor de IA e devolver o resultado usando as abstrações de imagem do Spring AI. A implementação atual integra a API de edição de imagens da OpenAI; a separação entre `core` e `provider` prepara a biblioteca para receber outros provedores no futuro.
 
@@ -56,8 +56,8 @@ As responsabilidades estão separadas da seguinte forma:
 - `AiImageEditPrompt` representa a imagem, as instruções e as opções da edição.
 - `AiImageEditModel` é a API usada pela aplicação para solicitar uma edição.
 - `AiImageEditClient` define o contrato comum dos clientes de provedores.
-- `OpenAiImageEditClient` transforma o prompt em uma requisição multipart para a OpenAI.
-- `OpenAiImageResultAdapter` converte a resposta específica da OpenAI para o modelo comum da biblioteca.
+- `OpenAiImageEditClient` transforma o prompt em uma requisição multipart para um modelo específico de IA.
+- `OpenAiImageResultAdapter` converte a resposta específica do modelo para o modelo comum da biblioteca.
 
 A chamada é síncrona: `AiImageEditModel.call(...)` aguarda o provedor terminar a edição e retorna um `ImageResponse` do Spring AI.
 
@@ -196,7 +196,7 @@ Na implementação atual, o cliente OpenAI utiliza estas opções:
 | `model` | `gpt-image-1` | Modelo usado para editar a imagem. |
 | `n` | `1` | Quantidade de imagens solicitadas. |
 
-Embora `ImageOptions` também possua largura, altura, formato de resposta e estilo, esses valores **ainda não são enviados** pelo `OpenAiImageEditClient`. Defini-los nesta versão não altera a requisição. Essa distinção evita que uma configuração aparentemente aceita produza expectativas incorretas.
+Embora `ImageOptions` também possua largura, altura, formato de resposta e estilo, esses valores **ainda não são enviados** pelo `OpenAiImageEditClient`. Defini-los nesta versão não altera a requisição. Essa distinção evita que uma configuração aparentemente aceita e produza expectativas incorretas.
 
 ### Configuração do cliente HTTP
 
@@ -206,6 +206,8 @@ Embora `ImageOptions` também possua largura, altura, formato de resposta e esti
 | `ai.image.edit.client.openai.api-key` | — | Propriedade alternativa para a chave da OpenAI. |
 | `ai.image.edit.client.openai.connection-timeout` | `PT30S` | Tempo máximo para estabelecer a conexão. |
 | `ai.image.edit.client.openai.read-timeout` | `PT3M` | Tempo máximo de espera pela resposta. |
+
+### Observação: Dependendo do tamanho da imagem, será necessário alterar a configuração de tamanho suportado à arquivos no framework.
 
 ## Trabalhando com o resultado
 
@@ -244,8 +246,6 @@ Nesta versão, a biblioteca:
 - devolve imagens codificadas em Base64;
 - executa chamadas síncronas;
 - envia `model` e `n` como opções da edição.
-
-Ainda não estão implementados múltiplas imagens de referência, máscaras, streaming, respostas por URL ou opções específicas como qualidade, tamanho, transparência e fidelidade da imagem de entrada.
 
 ## Evolução do projeto
 
